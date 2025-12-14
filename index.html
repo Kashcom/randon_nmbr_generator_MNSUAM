@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guessing Game - Challenge Your Mind</title>
+    <meta name="description"
+        content="Test your guessing skills with our interactive number guessing game. Three difficulty levels with scoring system.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
+            <svg class="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+
+        <!-- Volume Control -->
+        <div class="volume-control" id="volumeControl">
+            <button class="volume-toggle" id="volumeToggle" onclick="toggleVolumeSlider()" aria-label="Volume control">
+                <svg class="volume-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path class="volume-waves" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path class="volume-waves" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+                <svg class="mute-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" style="display: none;">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+            </button>
+            <div class="volume-slider-container" id="volumeSliderContainer">
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50"
+                    oninput="adjustVolume(this.value)">
+                <span class="volume-percentage" id="volumePercentage">50%</span>
+            </div>
+        </div>
+
+        <!-- Score Board (Always Visible) -->
+        <div class="scoreboard">
+            <div class="score-item">
+                <span class="score-label">Total Score</span>
+                <span class="score-value" id="totalScore">0</span>
+            </div>
+            <div class="score-divider"></div>
+            <div class="score-item">
+                <span class="score-label">Current Level</span>
+                <span class="score-value" id="currentLevel">-</span>
+            </div>
+            <div class="score-divider"></div>
+            <div class="score-item">
+                <span class="score-label">Attempts Left</span>
+                <span class="score-value" id="attemptsLeft">-</span>
+            </div>
+        </div>
+
+        <!-- Level Selection Screen -->
+        <div class="screen" id="levelScreen">
+            <div class="header">
+                <h1 class="title">
+                    <span class="title-gradient">Number Guessing</span>
+                    <span class="title-sub">Game</span>
+                </h1>
+                <p class="subtitle">Choose your challenge level and test your luck!</p>
+            </div>
+
+            <div class="levels-grid">
+                <div class="level-card easy" data-level="easy">
+                    <div class="level-icon">🎯</div>
+                    <h2 class="level-title">Easy</h2>
+                    <div class="level-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Range:</span>
+                            <span class="detail-value">1 - 50</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Attempts:</span>
+                            <span class="detail-value">10</span>
+                        </div>
+                        <div class="detail-item bonus">
+                            <span class="detail-label">Bonus:</span>
+                            <span class="detail-value">+5 for ≤5 attempts</span>
+                        </div>
+                    </div>
+                    <button class="level-btn" onclick="startGame('easy')">Start Easy</button>
+                </div>
+
+                <div class="level-card medium" data-level="medium">
+                    <div class="level-icon">🎲</div>
+                    <h2 class="level-title">Medium</h2>
+                    <div class="level-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Range:</span>
+                            <span class="detail-value">1 - 75</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Attempts:</span>
+                            <span class="detail-value">7</span>
+                        </div>
+                        <div class="detail-item bonus">
+                            <span class="detail-label">Bonus:</span>
+                            <span class="detail-value">+5 for ≤5 attempts</span>
+                        </div>
+                    </div>
+                    <button class="level-btn" onclick="startGame('medium')">Start Medium</button>
+                </div>
+
+                <div class="level-card hard" data-level="hard">
+                    <div class="level-icon">🔥</div>
+                    <h2 class="level-title">Hard</h2>
+                    <div class="level-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Range:</span>
+                            <span class="detail-value">1 - 100</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Attempts:</span>
+                            <span class="detail-value">5</span>
+                        </div>
+                        <div class="detail-item bonus">
+                            <span class="detail-label">Bonus:</span>
+                            <span class="detail-value">+5 for ≤5 attempts</span>
+                        </div>
+                    </div>
+                    <button class="level-btn" onclick="startGame('hard')">Start Hard</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="screen hidden" id="gameScreen">
+            <div class="game-header">
+                <h2 class="game-title">Guess the Number!</h2>
+                <p class="game-info">Number is between <span id="rangeMin">1</span> and <span id="rangeMax">50</span>
+                </p>
+            </div>
+
+            <div class="game-content">
+                <div class="feedback-area">
+                    <div class="feedback-message" id="feedbackMessage">
+                        Make your first guess!
+                    </div>
+                    <div class="attempts-badge">
+                        <span id="attemptsUsed">0</span> / <span id="maxAttempts">10</span> attempts
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <input type="number" id="guessInput" class="guess-input" placeholder="Enter your guess" min="1">
+                    <button class="submit-btn" id="submitBtn" onclick="makeGuess()">
+                        <span>Submit Guess</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="guess-history" id="guessHistory"></div>
+            </div>
+
+            <div class="game-actions">
+                <button class="action-btn secondary" onclick="resetGame()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    Restart
+                </button>
+                <button class="action-btn" onclick="changeLevel()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Change Level
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="screen hidden" id="resultScreen">
+            <div class="result-content">
+                <div class="result-icon" id="resultIcon">🎉</div>
+                <h2 class="result-title" id="resultTitle">Congratulations!</h2>
+                <p class="result-message" id="resultMessage">You guessed the number!</p>
+
+                <div class="result-stats">
+                    <div class="stat-card">
+                        <span class="stat-label">Target Number</span>
+                        <span class="stat-value" id="targetNumber">42</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Attempts Used</span>
+                        <span class="stat-value" id="finalAttempts">3</span>
+                    </div>
+                    <div class="stat-card highlight">
+                        <span class="stat-label">Score Earned</span>
+                        <span class="stat-value" id="scoreEarned">+15</span>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="result-btn primary" onclick="playAgain()">
+                        Play Again
+                    </button>
+                    <button class="result-btn secondary" onclick="changeLevel()">
+                        Change Level
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+/* ==========================================
+   Theme Toggle Button
+   ========================================== */
+.theme-toggle {
+    position: fixed;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    width: 56px;
+    height: 56px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--bg-glass-border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+    color: var(--text-primary);
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px) rotate(15deg);
+    box-shadow: var(--shadow-lg);
+    background: var(--gradient-primary);
+    color: white;
+    border-color: transparent;
+}
+
+.theme-toggle:active {
+    transform: translateY(0) rotate(0deg);
+}
+
+.theme-toggle svg {
+    transition: all var(--transition-base);
+}
+
+.sun-icon {
+    display: none;
+}
+
+.moon-icon {
+    display: block;
+}
+
+[data-theme="light"] .sun-icon {
+    display: block;
+}
+
+[data-theme="light"] .moon-icon {
+    display: none;
+}
+
+/* Smooth theme transition */
+body {
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.screen,
+.scoreboard,
+.theme-toggle,
+.level-card,
+.guess-input,
+.feedback-message,
+.stat-card {
+    transition: background-color var(--transition-base),
+        border-color var(--transition-base),
+        color var(--transition-base);
+}
