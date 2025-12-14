@@ -70,6 +70,7 @@ export default function Game() {
     const [volume, setVolume] = useState(0.5);
     const [isMuted, setIsMuted] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
     // Refs for Audio
     const bgMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -95,9 +96,6 @@ export default function Game() {
         if (savedTheme) setTheme(savedTheme);
 
         document.documentElement.setAttribute('data-theme', savedTheme || 'dark');
-
-        // Note: Autoplay might be blocked, we handle play on logic or user interaction if needed
-        // For this port, we'll respect the logic but might need user interaction to start audio context
 
         return () => {
             if (bgMusicRef.current) {
@@ -214,16 +212,12 @@ export default function Game() {
                 setCurrentScreen('result');
             }, 1500);
         } else {
-            const comparison = guess < targetNumber! ? 'higher' : 'lower'; // Fixed logic: if guess < target, answer is higher
-            const hintArrow = guess < targetNumber! ? '↑' : '↓';
-            // Note: script.js had `guess < gameState.targetNumber ? 'lower' : 'higher'`, 
-            // wait: if guess (10) < target (50), guess is LOWER than target. 
-            // script.js said: `Your guess (${guess}) is ${comparison} than the number!` 
-            // if input 10, target 50 -> 10 < 50 -> comparison = 'lower'. 
-            // "Your guess (10) is lower than the number!" -> This implies user needs to guess higher.
-            // script.js logic: `const comparison = guess < gameState.targetNumber ? 'lower' : 'higher';` is correct for that sentence structure.
-
             const comparisonText = guess < targetNumber! ? 'lower' : 'higher';
+            // Hint arrow: guess < target (10 < 50) means target is HIGHER (Up arrow) or guess is LOWER?
+            // Existing logic: guess < target ? '↑' : '↓'.
+            // If guess is 10, target 50. 10 < 50. Hint '↑'. Means "Go Up". Correct.
+            // If guess is 90, target 50. 90 > 50. Hint '↓'. Means "Go Down". Correct.
+            const hintArrow = guess < targetNumber! ? '↑' : '↓';
 
             let type: 'info' | 'warning' = 'info';
             if (attemptsLeft <= 2) type = 'warning';
@@ -251,16 +245,8 @@ export default function Game() {
         localStorage.setItem('musicMuted', (newVol === 0).toString());
     };
 
-    const toggleMute = () => {
-        const newMuted = !isMuted;
-        setIsMuted(newMuted);
-        if (newMuted) {
-            // Effectively mute
-            if (bgMusicRef.current) bgMusicRef.current.volume = 0;
-        } else {
-            if (bgMusicRef.current) bgMusicRef.current.volume = volume === 0 ? 0.5 : volume; // restore default if was 0
-        }
-        localStorage.setItem('musicMuted', newMuted.toString());
+    const toggleVolumeSlider = () => {
+        setShowVolumeSlider(prev => !prev);
     };
 
     // ==========================================
@@ -291,28 +277,41 @@ export default function Game() {
         <div className="container">
             {/* Theme Toggle */}
             <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-                {theme === 'dark' ? (
-                    <svg className="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                ) : (
-                    <svg className="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                )}
+                {/* Render BOTH icons and let CSS handle display based on [data-theme] */}
+                <svg className="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg className="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
             </button>
 
             {/* Volume Control */}
             <div className="volume-control" id="volumeControl">
-                <div className="volume-slider-container active" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button className="volume-toggle" onClick={toggleVolumeSlider} aria-label="Volume control">
+                    {!isMuted ? (
+                        <svg className="volume-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path className="volume-waves" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            <path className="volume-waves" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        </svg>
+                    ) : (
+                        <svg className="mute-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <line x1="23" y1="9" x2="17" y2="15"></line>
+                            <line x1="17" y1="9" x2="23" y2="15"></line>
+                        </svg>
+                    )}
+                </button>
+                <div className={`volume-slider-container ${showVolumeSlider ? 'active' : ''}`} style={{ display: showVolumeSlider ? 'flex' : 'none', alignItems: 'center', gap: '8px' }}>
                     <input
                         type="range"
                         className="volume-slider"
